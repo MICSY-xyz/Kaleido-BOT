@@ -63,3 +63,7 @@ This version maintains the same message but adjusts the structure and wording fo
    ```bash
    npm run start
    ```
+---
+# 📌 License
+
+**This project is available under the [MIT](https://github.com/MICSY-xyz/kaleido-BOT/blob/main/LICENSE) License. Feel free to use and modify it as needed.**
