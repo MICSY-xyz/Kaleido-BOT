@@ -102,7 +102,7 @@ class KaleidoMiningBot {
 
     } catch (error) {
       console.error(chalk.red(`[Wallet ${this.botIndex}] Initialization failed: ${error.message}`));
-      console.log(chalk.gray(`[Wallet ${this.botIndex}] Retrying initialization in 10 seconds...`));
+      console.log(chalk.yellow(`[Wallet ${this.botIndex}] Retrying initialization in 10 seconds...`));
       setTimeout(() => this.initialize(), 10000);
     }
   }
@@ -118,7 +118,7 @@ class KaleidoMiningBot {
           throw error;
         }
         const delay = Math.pow(2, i) * 1000;
-        console.log(chalk.gray(`[${operationName}] Error (status: ${status || 'unknown'}). Retrying (${i + 1}/${retries}) in ${delay / 1000} seconds...`));
+        console.log(chalk.yellow(`[${operationName}] Error (status: ${status || 'unknown'}). Retrying (${i + 1}/${retries}) in ${delay / 1000} seconds...`));
         if (error.response && error.response.headers && error.response.headers['retry-after']) {
           const retryAfter = parseInt(error.response.headers['retry-after'], 10) * 1000;
           await new Promise(resolve => setTimeout(resolve, retryAfter));
@@ -142,7 +142,7 @@ class KaleidoMiningBot {
       if (this.pauseStart) {
         const downtime = Date.now() - this.pauseStart;
         this.pausedDuration += downtime;
-        console.log(chalk.gray(`[Wallet ${this.botIndex}] Resumed after downtime of ${(downtime / 1000).toFixed(2)} seconds.`));
+        console.log(chalk.yellow(`[Wallet ${this.botIndex}] Resumed after downtime of ${(downtime / 1000).toFixed(2)} seconds.`));
         this.pauseStart = null;
       }
       const newEarnings = this.calculateEarnings();
@@ -178,7 +178,7 @@ class KaleidoMiningBot {
 
       if (!this.pauseStart) {
         this.pauseStart = Date.now();
-        console.log(chalk.gray(`[Wallet ${this.botIndex}] Entering maintenance mode, pausing earnings calculation.`));
+        console.log(chalk.yellow(`[Wallet ${this.botIndex}] Entering maintenance mode, pausing earnings calculation.`));
       }
       console.error(chalk.red(`[Wallet ${this.botIndex}] Update failed: ${error.message}`));
       throw error;
@@ -211,7 +211,7 @@ class KaleidoMiningBot {
     return wallet.replace(/.(?=.{3})/g, "*");
   }
 
-logStatus(final = false) {
+  logStatus(final = false) {
     const statusType = final ? "Final Status" : "Mining Status";
     const uptimeSeconds = (Date.now() - this.miningState.startTime - this.pausedDuration) / 1000;
     const formattedUptime = this.formatUptime(uptimeSeconds);
@@ -219,52 +219,58 @@ logStatus(final = false) {
 
     const headers = ['Uptime', 'Active', 'Hashrate', 'Total', 'Pending', 'Paid', 'Reff Bonus'];
     const data = [
-        formattedUptime,
-        this.miningState.isActive ? chalk.green('✅ Yes') : chalk.red('❌ No'),
-        `${this.stats.hashrate} MH/s`,
-        `${this.currentEarnings.total.toFixed(8)} KLDO`,
-        `${this.currentEarnings.pending.toFixed(8)} KLDO`,
-        `${this.currentEarnings.paid.toFixed(8)} KLDO`,
-        `+${(this.referralBonus * 100).toFixed(1)}%`
+      formattedUptime,
+      this.miningState.isActive,
+      `${this.stats.hashrate} MH/s`,
+      `${this.currentEarnings.total.toFixed(8)} KLDO`,
+      `${this.currentEarnings.pending.toFixed(8)} KLDO`,
+      `${this.currentEarnings.paid.toFixed(8)} KLDO`,
+      `+${(this.referralBonus * 100).toFixed(1)}%`
     ];
 
-    function buildTable(headers, data) {
-        const colWidths = headers.map((header, i) => Math.max(header.length, data[i].length) + 2);
-        const horizontalLine = '+' + colWidths.map(w => '-'.repeat(w)).join('+') + '+';
-        const headerRow = '|' + headers.map((h, i) => ' ' + h.padEnd(colWidths[i] - 1)).join('|') + '|';
-        const dataRow = '|' + data.map((d, i) => ' ' + d.padEnd(colWidths[i] - 1)).join('|') + '|';
+    function buildHorizontalTable(headers, data) {
+      const colWidths = headers.map((header, i) => {
+        return Math.max(header.toString().length, data[i].toString().length) + 2;
+      });
+      const horizontalLine = '+' + colWidths.map(w => '-'.repeat(w)).join('+') + '+';
+      const headerRow = '|' + headers.map((h, i) => ' ' + h.toString().padEnd(colWidths[i] - 1, ' ')).join('|') + '|';
 
-        return `${horizontalLine}\n${headerRow}\n${horizontalLine}\n${dataRow}\n${horizontalLine}`;
+      const colorFunctions = [
+        chalk.green,
+        chalk.green,
+        chalk.green,
+        chalk.cyan,
+        chalk.yellow,
+        chalk.hex('#FFA500'),
+        text => text
+      ];
+
+      const dataRow = '|' + data.map((d, i) =>
+        ' ' + colorFunctions[i](d.toString().padEnd(colWidths[i] - 1, ' '))
+      ).join('|') + '|';
+
+      return horizontalLine + '\n' + headerRow + '\n' + horizontalLine + '\n' + dataRow + '\n' + horizontalLine;
     }
 
-    const table = buildTable(headers, data);
+    const table = buildHorizontalTable(headers, data);
 
-    console.log(chalk.gray(`[Wallet ${this.botIndex}] ${statusType} for Wallet: ${chalk.greenBright(maskedWallet)}`));
-    console.log(table);
-}
+    console.log(chalk.yellow(
+      `[Wallet ${this.botIndex}] ${statusType} for Wallet: ${chalk.greenBright(maskedWallet)}\n` + table
+    ));
+  }
 
   async startMiningLoop() {
-    console.log(chalk.green(`[Wallet ${this.botIndex}] Mining started...`));
-
-    // Jalankan update status setiap 5 detik
-    setInterval(() => {
-        console.clear();  // Bersihkan tampilan terminal sebelum update baru
-        this.logStatus(); // Tampilkan tabel CLI setiap 5 detik
-    }, 5000);
-
     while (this.miningState.isActive) {
-        try {
-            await this.updateBalance();
-        } catch (error) {
-            console.error(chalk.red(`[Wallet ${this.botIndex}] API error detected, switching to offline mode.`));
-            console.log(chalk.gray(`[Wallet ${this.botIndex}] Retrying in 60 seconds...`));
-            await new Promise(resolve => setTimeout(resolve, 60000));
-        }
-
-        // Delay utama jadi 60 detik
+      try {
+        await this.updateBalance();
+      } catch (error) {
+        console.error(chalk.red(`[Wallet ${this.botIndex}] API error detected, switching to offline mode.`));
+        console.log(chalk.yellow(`[Wallet ${this.botIndex}] Retrying in 60 seconds...`));
         await new Promise(resolve => setTimeout(resolve, 60000));
+      }
+      await new Promise(resolve => setTimeout(resolve, 30000));
     }
-}
+  }
 
   async stop() {
     this.miningState.isActive = false;
@@ -303,7 +309,7 @@ export class MiningCoordinator {
 
   async start() {
     if (this.isRunning) {
-      console.log(chalk.gray('Mining coordinator is already running'));
+      console.log(chalk.yellow('Mining coordinator is already running'));
       return;
     }
 
@@ -316,7 +322,7 @@ export class MiningCoordinator {
       return;
     }
 
-    console.log(chalk.cyan(`Wallets ${wallets.length} active\n`));
+    console.log(chalk.blue(`Loaded ${wallets.length} wallets\n`));
 
     this.bots = wallets.map((wallet, index) => {
       const bot = new KaleidoMiningBot(wallet, index + 1);
@@ -325,16 +331,16 @@ export class MiningCoordinator {
     });
 
     process.on('SIGINT', async () => {
-      console.log(chalk.gray('\nMining Power Off ...'));
+      console.log(chalk.yellow('\nMining Power Off...'));
       this.totalPaid = (await Promise.all(this.bots.map(bot => bot.stop())))
         .reduce((sum, paid) => sum + paid, 0);
 
       console.log(chalk.green(`
-      ## Payment & Wallets Detail ##
+      ### Payment & Wallets Detail ###
       Total Wallets: ${this.bots.length}
       Total Paid: ${this.totalPaid.toFixed(8)} KLDO
       `));
       process.exit();
     });
   }
-}
+            }
