@@ -48,7 +48,7 @@ class KaleidoMiningBot {
       this.referralBonus = sessionData.referralBonus;
       this.session = sessionData.session || Math.floor(Math.random() * 1000000);
       this.pausedDuration = sessionData.pausedDuration || 0;
-      console.log(chalk.cyan(`[Wallet ${this.botIndex}] Previous session loaded successfully`));
+      console.log(chalk.red(`[Wallet ${this.botIndex}] Previous session loaded successfully`));
       return true;
     } catch (error) {
       this.session = Math.floor(Math.random() * 1000000);
