@@ -48,7 +48,7 @@ class KaleidoMiningBot {
       this.referralBonus = sessionData.referralBonus;
       this.session = sessionData.session || Math.floor(Math.random() * 1000000);
       this.pausedDuration = sessionData.pausedDuration || 0;
-      console.log(chalk.green(`[Wallet ${this.botIndex}] Previous session loaded successfully`));
+      console.log(chalk.cyan(`[Wallet ${this.botIndex}] Previous session loaded successfully`));
       return true;
     } catch (error) {
       this.session = Math.floor(Math.random() * 1000000);
@@ -97,7 +97,7 @@ class KaleidoMiningBot {
 
       this.miningState.isActive = true;
 
-      console.log(chalk.green(`[Wallet ${this.botIndex}] Mining ${hasSession ? 'resumed' : 'initialized'} successfully`));
+      console.log(chalk.cyan(`[Wallet ${this.botIndex}] Mining ${hasSession ? 'resumed' : 'initialized'} successfully`));
       await this.startMiningLoop();
 
     } catch (error) {
@@ -236,9 +236,9 @@ class KaleidoMiningBot {
       const headerRow = '|' + headers.map((h, i) => ' ' + h.toString().padEnd(colWidths[i] - 1, ' ')).join('|') + '|';
 
       const colorFunctions = [
-        chalk.green,
-        chalk.green,
-        chalk.green,
+        chalk.cyan,
+        chalk.cyan,
+        chalk.cyan,
         chalk.cyan,
         chalk.yellow,
         chalk.hex('#FFA500'),
@@ -255,7 +255,7 @@ class KaleidoMiningBot {
     const table = buildHorizontalTable(headers, data);
 
     console.log(chalk.yellow(
-      `[Wallet ${this.botIndex}] ${statusType} for Wallet: ${chalk.greenBright(maskedWallet)}\n` + table
+      `[Wallet ${this.botIndex}] ${statusType} for Wallet: ${chalk.cyanBright(maskedWallet)}\n` + table
     ));
   }
 
@@ -335,7 +335,7 @@ export class MiningCoordinator {
       this.totalPaid = (await Promise.all(this.bots.map(bot => bot.stop())))
         .reduce((sum, paid) => sum + paid, 0);
 
-      console.log(chalk.green(`
+      console.log(chalk.cyan(`
       ### Payment & Wallets Detail ###
       Total Wallets: ${this.bots.length}
       Total Paid: ${this.totalPaid.toFixed(8)} KLDO
@@ -343,4 +343,4 @@ export class MiningCoordinator {
       process.exit();
     });
   }
-            }
+                 }
