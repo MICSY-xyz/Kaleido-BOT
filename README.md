@@ -6,6 +6,7 @@
 
 Let's Join Grub Discussion [**CRYPTOKOM**](https://t.me/cryptokom1) and Channel [**CRYPTOKOM2**](https://t.me/cryptokom2)
 
+---
 # ⚠️ Essential Security Rules #
 
 To ensure optimal performance and prevent account restrictions, please adhere to the following guidelines:
@@ -42,6 +43,7 @@ This version maintains the same message but adjusts the structure and wording fo
 ✅ **Cross-Platform Compatibility**:
 •Works on Windows, macOS, Linux, *Android (run with ubuntu proot/chroot).
 
+---
 # ⚙️ Installation
 
 1. Clone the repository:
