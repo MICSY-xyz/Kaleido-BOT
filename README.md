@@ -48,8 +48,8 @@ This version maintains the same message but adjusts the structure and wording fo
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/MICSY-xyz/kaleido-BOT.git
-   cd kaleido-BOT
+   git clone https://github.com/MICSY-xyz/Kaleido-BOT.git
+   cd Kaleido-BOT
    ```
 2. Install dependencies:
    ```bash
